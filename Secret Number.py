@@ -1,4 +1,4 @@
-import random #This library gives us tools to generate unpredictible numbers.
+import random  # This library gives us tools to generate unpredictible numbers.
 
 # 1. MASTER LOOP: Wraps everything so 'Play Again' can actually restart the whole game
 while True:
@@ -31,7 +31,9 @@ while True:
     # Game Loop
     while attempts < max_attempts:
         try:
-            guess = int(input(f"Attempt {attempts + 1}/{max_attempts} - Take a guess: "))
+            guess = int(
+                input(f"Attempt {attempts + 1}/{max_attempts} - Take a guess: ")
+            )
         except ValueError:
             print("Invalid input! Please enter a valid whole number.")
             continue
@@ -45,7 +47,9 @@ while True:
             print(f"Congratulations! You guessed it in {attempts} attempts!")
             break
     else:
-        print(f"Game over! You ran out of attempts. The secret number was {secret_number}.")
+        print(
+            f"Game over! You ran out of attempts. The secret number was {secret_number}."
+        )
 
     # Play Again Option
     play_again = input("\nDo you want to play again? (y/n): ").strip().lower()
