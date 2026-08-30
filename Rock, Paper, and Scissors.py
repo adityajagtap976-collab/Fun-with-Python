@@ -3,9 +3,9 @@ from enum import Enum
 
 
 class Choice(Enum):
-    ROCK = 1
-    PAPER = 2
-    SCISSORS = 3
+    ROCK = 0
+    PAPER = 1
+    SCISSORS = 2
 
 
 # Ask the user for target score before starting
@@ -21,7 +21,6 @@ while True:
     except ValueError:
         print("Invalid input! Please enter a whole number.")
 
-# Score Tracker Variables
 player_score = 0
 computer_score = 0
 ties = 0
@@ -29,22 +28,21 @@ ties = 0
 print(f"\nFirst player to reach {target_score} wins! Let's start.")
 
 while True:
-    # Display running scoreboard at the start of each round
     print(
         f"\nSCOREBOARD | You: {player_score}/{target_score} | Computer: {computer_score}/{target_score} | Ties: {ties}"
     )
-    print("Select:\n1 for Rock\n2 for Paper\n3 for Scissors\nq to Quit early")
+    print("Select:\n0 for Rock\n1 for Paper\n2 for Scissors\nq to Quit early")
 
-    user_input = input("\nEnter your choice (1-3): ").strip()
+    user_input = input("\nEnter your choice (0-2): ").strip()
 
     if user_input.lower() == "q":
         print("\nGame ended early by player.")
         break
 
-    if user_input in ["1", "2", "3"]:
+    if user_input in ["0", "1", "2"]:
         player_choice = Choice(int(user_input))
     else:
-        print("Invalid choice! Please enter 1, 2, 3, or 'q'.")
+        print("Invalid choice! Please enter 0, 1, 2, or 'q'.")
         continue
 
     computer_choice = random.choice(list(Choice))
@@ -52,18 +50,20 @@ while True:
     print(f"\nYou chose: {player_choice.name}")
     print(f"Computer chose: {computer_choice.name}")
 
-    # Determine winner & update score counters
-    if player_choice == computer_choice:
+    # --- Modulo Arithmetic Win/Loss Logic ---
+    # Formula: (Player - Computer) % 3
+    # Result == 0 -> Tie
+    # Result == 1 -> Player Win
+    # Result == 2 -> Computer Win
+    result = (player_choice.value - computer_choice.value) % 3
+
+    if result == 0:
         print("Result: It's a tie!")
         ties += 1
-    elif (
-        (player_choice == Choice.ROCK and computer_choice == Choice.SCISSORS)
-        or (player_choice == Choice.PAPER and computer_choice == Choice.ROCK)
-        or (player_choice == Choice.SCISSORS and computer_choice == Choice.PAPER)
-    ):
+    elif result == 1:
         print("Result: You win this round! 🎉")
         player_score += 1
-    else:
+    else:  # result == 2
         print("Result: Computer wins this round! 🤖")
         computer_score += 1
 
