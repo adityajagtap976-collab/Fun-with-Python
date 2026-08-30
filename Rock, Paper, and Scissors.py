@@ -8,48 +8,51 @@ class Choice(Enum):
     SCISSORS = 3
 
 
+# Ask the user for target score before starting
+print("----- Welcome to Rock, Paper, and Scissors game! -----")
+while True:
+    try:
+        target_score = int(
+            input("Enter target score to win (e.g., 3 for First to 3): ").strip()
+        )
+        if target_score > 0:
+            break
+        print("Please enter a positive number greater than 0.")
+    except ValueError:
+        print("Invalid input! Please enter a whole number.")
+
 # Score Tracker Variables
 player_score = 0
 computer_score = 0
 ties = 0
 
+print(f"\nFirst player to reach {target_score} wins! Let's start.")
+
 while True:
-
-    print("\n-----Welcome to Rock, Paper, and Scissors game!-----")
-    # Display running score board at the start of each round
+    # Display running scoreboard at the start of each round
     print(
-        f"SCORBOARD | You: {player_score} | Computer: {computer_score} | Ties: {ties}"
+        f"\nSCOREBOARD | You: {player_score}/{target_score} | Computer: {computer_score}/{target_score} | Ties: {ties}"
     )
-    print("Select: 1 for Rock, 2 for Paper, 3 for Scissors, and q to Quit")
+    print("Select:\n1 for Rock\n2 for Paper\n3 for Scissors\nq to Quit early")
 
-    # 1. Take input from the user
-    user_choice = input("\nEnter your choice (1-3): ").strip()
+    user_input = input("\nEnter your choice (1-3): ").strip()
 
-    # Allow user to quit the loop
-    if user_choice.lower() == "q":
-        # Display final result when exiting
-        print("\n=============== FINAL SCORE ===============")
-        print(f" You Won: {player_score} round(s)")
-        print(f" Computer Won: {computer_score} round(s)")
-        print(f" Ties: {ties} round(s)")
-        print("===========================================")
-        print("Thanks for playing! Goodbye.")
+    if user_input.lower() == "q":
+        print("\nGame ended early by player.")
         break
 
-    # 2. Validate input and convert to Enum
-    if user_choice in ["1", "2", "3"]:
-        player_choice = Choice(int(user_choice))
+    if user_input in ["1", "2", "3"]:
+        player_choice = Choice(int(user_input))
     else:
         print("Invalid choice! Please enter 1, 2, 3, or 'q'.")
         continue
 
-    # 3. Generate random choice for the computer
     computer_choice = random.choice(list(Choice))
 
-    print(f"\nYou choose: {player_choice.name}")
+    print(f"\nYou chose: {player_choice.name}")
     print(f"Computer chose: {computer_choice.name}")
 
-    # 4. Determine the winner
+    # Determine winner & update score counters
     if player_choice == computer_choice:
         print("Result: It's a tie!")
         ties += 1
@@ -58,8 +61,29 @@ while True:
         or (player_choice == Choice.PAPER and computer_choice == Choice.ROCK)
         or (player_choice == Choice.SCISSORS and computer_choice == Choice.PAPER)
     ):
-        print("Result: You Win! 🎉")
+        print("Result: You win this round! 🎉")
         player_score += 1
     else:
-        print("Result: Computer wins! 🤖")
+        print("Result: Computer wins this round! 🤖")
         computer_score += 1
+
+    # Check for target score victory condition
+    if player_score == target_score:
+        print(
+            f"\n🏆 CONGRATULATIONS! You reached {target_score} points first and won the match!"
+        )
+        break
+    elif computer_score == target_score:
+        print(
+            f"\n💻 GAME OVER! Computer reached {target_score} points first and won the match."
+        )
+        break
+
+# Final Summary Display
+print("\n================ FINAL MATCH SUMMARY ================")
+print(f" Target Score: {target_score}")
+print(f" Player Score: {player_score}")
+print(f" Computer Score: {computer_score}")
+print(f" Total Ties: {ties}")
+print("=====================================================")
+print("Thanks for playing! Goodbye.")
