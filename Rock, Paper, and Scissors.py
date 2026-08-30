@@ -2,6 +2,7 @@ import random
 from enum import Enum
 
 
+# Zero-indexed Enum for clean modulo arithmetic
 class Choice(Enum):
     ROCK = 0
     PAPER = 1
@@ -31,18 +32,21 @@ while True:
     print(
         f"\nSCOREBOARD | You: {player_score}/{target_score} | Computer: {computer_score}/{target_score} | Ties: {ties}"
     )
-    print("Select:\n0 for Rock\n1 for Paper\n2 for Scissors\nq to Quit early")
+    # Menu remains 1, 2, 3 for user convenience
+    print("Select:\n1 for Rock\n2 for Paper\n3 for Scissors\nq to Quit early")
 
-    user_input = input("\nEnter your choice (0-2): ").strip()
+    user_input = input("\nEnter your choice (1-3): ").strip()
 
     if user_input.lower() == "q":
         print("\nGame ended early by player.")
         break
 
-    if user_input in ["0", "1", "2"]:
-        player_choice = Choice(int(user_input))
+    if user_input in ["1", "2", "3"]:
+        # Convert user input (1, 2, 3) to zero-indexed Enum value (0, 1, 2)
+        zero_indexed_value = int(user_input) - 1
+        player_choice = Choice(zero_indexed_value)
     else:
-        print("Invalid choice! Please enter 0, 1, 2, or 'q'.")
+        print("Invalid choice! Please enter 1, 2, 3, or 'q'.")
         continue
 
     computer_choice = random.choice(list(Choice))
@@ -50,11 +54,7 @@ while True:
     print(f"\nYou chose: {player_choice.name}")
     print(f"Computer chose: {computer_choice.name}")
 
-    # --- Modulo Arithmetic Win/Loss Logic ---
-    # Formula: (Player - Computer) % 3
-    # Result == 0 -> Tie
-    # Result == 1 -> Player Win
-    # Result == 2 -> Computer Win
+    # Zero-indexed Modulo Arithmetic: (Player - Computer) % 3
     result = (player_choice.value - computer_choice.value) % 3
 
     if result == 0:
