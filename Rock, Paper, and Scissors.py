@@ -1,7 +1,8 @@
-import random
+import unittest
 from enum import Enum
 
 
+# Import or include classes to test
 class Choice(Enum):
     ROCK = 0
     PAPER = 1
@@ -9,8 +10,6 @@ class Choice(Enum):
 
 
 class ScoreBoard:
-    """Manages player scores and ties across rounds."""
-
     def __init__(self, target_score: int):
         self.target_score = target_score
         self.player_score = 0
@@ -32,104 +31,95 @@ class ScoreBoard:
             or self.computer_score == self.target_score
         )
 
-    def display(self):
-        print(
-            f"\nSCOREBOARD | You: {self.player_score}/{self.target_score} | "
-            f"Computer: {self.computer_score}/{self.target_score} | Ties: {self.ties}"
-        )
 
-    def display_summary(self):
-        print("\n================ FINAL MATCH SUMMARY ================")
-        print(f" Target Score:  {self.target_score}")
-        print(f" Player Score:  {self.player_score}")
-        print(f" Computer Score:{self.computer_score}")
-        print(f" Total Ties:    {self.ties}")
-        print("=====================================================")
+# Helper function encapsulating the modulo evaluation for direct testing
+def evaluate_round(player_choice: Choice, computer_choice: Choice) -> str:
+    result = (player_choice.value - computer_choice.value) % 3
+    if result == 0:
+        return "TIE"
+    elif result == 1:
+        return "WIN"
+    else:
+        return "LOSS"
 
 
-class RockPaperScissorsGame:
-    """Encapsulates game setup, user interaction, and round execution."""
+# =====================================================================
+# UNIT TESTS
+# =====================================================================
 
-    def __init__(self):
-        self.scoreboard = None
 
-    def _get_target_score(self) -> int:
-        """Prompts and validates the target score from user input."""
-        while True:
-            try:
-                score = int(
-                    input(
-                        "Enter target score to win (e.g., 3 for First to 3): "
-                    ).strip()
-                )
-                if score > 0:
-                    return score
-                print("Please enter a positive number greater than 0.")
-            except ValueError:
-                print("Invalid input! Please enter a whole number.")
+class TestScoreBoard(unittest.TestCase):
+    """Tests for the ScoreBoard class state and win-condition checks."""
 
-    def _get_player_choice(self) -> Choice | str:
-        """Prompts for input, converts 1-3 menu choices to 0-indexed Enum, or handles quit."""
-        print("\nSelect:\n1 for Rock\n2 for Paper\n3 for Scissors\nq to Quit early")
-        while True:
-            user_input = input("\nEnter your choice (1-3): ").strip().lower()
-            if user_input == "q":
-                return "q"
-            if user_input in ["1", "2", "3"]:
-                zero_indexed = int(user_input) - 1
-                return Choice(zero_indexed)
-            print("Invalid choice! Please enter 1, 2, 3, or 'q'.")
+    def setUp(self):
+        """Runs before every test method."""
+        self.scoreboard = ScoreBoard(target_score=3)
 
-    def _evaluate_round(self, player_choice: Choice, computer_choice: Choice):
-        """Uses zero-indexed modulo arithmetic to evaluate the winner."""
-        print(f"\nYou chose: {player_choice.name}")
-        print(f"Computer chose: {computer_choice.name}")
+    def test_initial_state(self):
+        """Ensure counters start at 0 and game is not over initially."""
+        self.assertEqual(self.scoreboard.player_score, 0)
+        self.assertEqual(self.scoreboard.computer_score, 0)
+        self.assertEqual(self.scoreboard.ties, 0)
+        self.assertFalse(self.scoreboard.is_game_over())
 
-        result = (player_choice.value - computer_choice.value) % 3
+    def test_record_win(self):
+        """Ensure player win counter increments properly."""
+        self.scoreboard.record_win()
+        self.assertEqual(self.scoreboard.player_score, 1)
 
-        if result == 0:
-            print("Result: It's a tie!")
-            self.scoreboard.record_tie()
-        elif result == 1:
-            print("Result: You win this round! 🎉")
-            self.scoreboard.record_win()
-        else:
-            print("Result: Computer wins this round! 🤖")
+    def test_record_loss(self):
+        """Ensure computer win counter increments properly."""
+        self.scoreboard.record_loss()
+        self.assertEqual(self.scoreboard.computer_score, 1)
+
+    def test_record_tie(self):
+        """Ensure tie counter increments properly."""
+        self.scoreboard.record_tie()
+        self.assertEqual(self.scoreboard.ties, 1)
+
+    def test_is_game_over_when_player_reaches_target(self):
+        """Game should end when player hits target score."""
+        self.scoreboard.record_win()
+        self.scoreboard.record_win()
+        self.assertFalse(self.scoreboard.is_game_over())
+
+        self.scoreboard.record_win()  # 3rd win
+        self.assertTrue(self.scoreboard.is_game_over())
+
+    def test_is_game_over_when_computer_reaches_target(self):
+        """Game should end when computer hits target score."""
+        for _ in range(3):
             self.scoreboard.record_loss()
+        self.assertTrue(self.scoreboard.is_game_over())
 
-    def start(self):
-        """Main game loop launcher."""
-        print("----- Welcome to Rock, Paper, and Scissors game! -----")
-        target_score = self._get_target_score()
-        self.scoreboard = ScoreBoard(target_score)
 
-        print(f"\nFirst player to reach {target_score} wins! Let's start.")
+class TestModuloWinLossLogic(unittest.TestCase):
+    """Tests all combinations of (Player choice - Computer choice) % 3."""
 
-        while not self.scoreboard.is_game_over():
-            self.scoreboard.display()
+    def test_ties(self):
+        """Same choices must result in a TIE."""
+        self.assertEqual(evaluate_round(Choice.ROCK, Choice.ROCK), "TIE")
+        self.assertEqual(evaluate_round(Choice.PAPER, Choice.PAPER), "TIE")
+        self.assertEqual(evaluate_round(Choice.SCISSORS, Choice.SCISSORS), "TIE")
 
-            player_choice = self._get_player_choice()
-            if player_choice == "q":
-                print("\nGame ended early by player.")
-                break
+    def test_player_wins(self):
+        """Verify all three winning scenarios for the player."""
+        # Rock (0) vs Scissors (2) -> (0 - 2) % 3 = -2 % 3 = 1
+        self.assertEqual(evaluate_round(Choice.ROCK, Choice.SCISSORS), "WIN")
+        # Paper (1) vs Rock (0) -> (1 - 0) % 3 = 1
+        self.assertEqual(evaluate_round(Choice.PAPER, Choice.ROCK), "WIN")
+        # Scissors (2) vs Paper (1) -> (2 - 1) % 3 = 1
+        self.assertEqual(evaluate_round(Choice.SCISSORS, Choice.PAPER), "WIN")
 
-            computer_choice = random.choice(list(Choice))
-            self._evaluate_round(player_choice, computer_choice)
-
-        # Check final winner if match wasn't quit early
-        if self.scoreboard.player_score == target_score:
-            print(
-                f"\n🏆 CONGRATULATIONS! You reached {target_score} points first and won the match!"
-            )
-        elif self.scoreboard.computer_score == target_score:
-            print(
-                f"\n💻 GAME OVER! Computer reached {target_score} points first and won the match."
-            )
-
-        self.scoreboard.display_summary()
-        print("Thanks for playing! Goodbye.")
+    def test_computer_wins(self):
+        """Verify all three losing scenarios for the player."""
+        # Rock (0) vs Paper (1) -> (0 - 1) % 3 = -1 % 3 = 2
+        self.assertEqual(evaluate_round(Choice.ROCK, Choice.PAPER), "LOSS")
+        # Paper (1) vs Scissors (2) -> (1 - 2) % 3 = -1 % 3 = 2
+        self.assertEqual(evaluate_round(Choice.PAPER, Choice.SCISSORS), "LOSS")
+        # Scissors (2) vs Rock (0) -> (2 - 0) % 3 = 2
+        self.assertEqual(evaluate_round(Choice.SCISSORS, Choice.ROCK), "LOSS")
 
 
 if __name__ == "__main__":
-    game = RockPaperScissorsGame()
-    game.start()
+    unittest.main()
