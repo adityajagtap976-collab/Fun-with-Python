@@ -2,6 +2,7 @@ import random
 import tkinter as tk
 from enum import Enum
 from tkinter import messagebox, ttk
+from typing import Literal
 
 
 class Choice(Enum):
@@ -19,13 +20,13 @@ class ScoreBoard:
         self.computer_score = 0
         self.ties = 0
 
-    def record_win(self):
+    def record_win(self) -> None:
         self.player_score += 1
 
-    def record_loss(self):
+    def record_loss(self) -> None:
         self.computer_score += 1
 
-    def record_tie(self):
+    def record_tie(self) -> None:
         self.ties += 1
 
     def is_game_over(self) -> bool:
@@ -34,7 +35,7 @@ class ScoreBoard:
             or self.computer_score >= self.target_score
         )
 
-    def reset(self, target_score: int):
+    def reset(self, target_score: int) -> None:
         self.target_score = target_score
         self.player_score = 0
         self.computer_score = 0
@@ -61,7 +62,7 @@ class RPSGuiApp:
 
         self._build_ui()
 
-    def _build_ui(self):
+    def _build_ui(self) -> None:
         # --- Top Title & Target Score Selection ---
         title_label = tk.Label(
             self.root, text="Rock Paper Scissors", font=("Helvetica", 18, "bold")
@@ -173,7 +174,7 @@ class RPSGuiApp:
         )
         self.scissors_btn.grid(row=0, column=2, padx=5)
 
-    def _play_round(self, player_choice: Choice):
+    def _play_round(self, player_choice: Choice) -> None:
         """Executes round evaluation using zero-indexed modulo arithmetic."""
         computer_choice = random.choice(list(Choice))
 
@@ -200,7 +201,7 @@ class RPSGuiApp:
         self._update_scoreboard_ui()
         self._check_match_winner()
 
-    def _update_scoreboard_ui(self):
+    def _update_scoreboard_ui(self) -> None:
         """Refreshes the scoreboard counters in the UI."""
         target = self.scoreboard.target_score
         self.player_score_lbl.config(
@@ -211,7 +212,7 @@ class RPSGuiApp:
         )
         self.ties_lbl.config(text=f"Ties: {self.scoreboard.ties}")
 
-    def _check_match_winner(self):
+    def _check_match_winner(self) -> None:
         """Checks if target score has been reached and shows popup notification."""
         if self.scoreboard.is_game_over():
             self._set_buttons_state(enabled=False)
@@ -225,7 +226,7 @@ class RPSGuiApp:
                     "Match Finished", "💻 Game Over! Computer won the match."
                 )
 
-    def _start_new_match(self):
+    def _start_new_match(self) -> None:
         """Resets scores, UI elements, and button states for a new game."""
         try:
             new_target = int(self.target_spinbox.get())
@@ -245,9 +246,9 @@ class RPSGuiApp:
         self.result_lbl.config(text="Select a move to begin!", fg="#0d47a1")
         self._set_buttons_state(enabled=True)
 
-    def _set_buttons_state(self, enabled: bool):
+    def _set_buttons_state(self, enabled: bool) -> None:
         """Utility to disable choice buttons when match completes."""
-        state = tk.NORMAL if enabled else tk.DISABLED
+        state: Literal["normal", "disabled"] = "normal" if enabled else "disabled"
         self.rock_btn.config(state=state)
         self.paper_btn.config(state=state)
         self.scissors_btn.config(state=state)
