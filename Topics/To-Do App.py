@@ -65,7 +65,7 @@ def delete_task(tasks):
         print("That's not a valid number")
         return
 
-    if 1 >= choice <= len(tasks):
+    if 1 <= choice <= len(tasks):
         task_title = tasks[choice - 1]["title"]
         confirm = input(f"Delete '{task_title}'? (y/n): ").strip().lower()
         if confirm != "y":
